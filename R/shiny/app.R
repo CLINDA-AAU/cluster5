@@ -7,6 +7,7 @@
 #    http://shiny.rstudio.com/
 #
 
+library(expm)
 library(shiny)
 library(ggplot2)
 library(tidyverse)
@@ -63,8 +64,7 @@ ui <- fluidPage(
                         selected = 3),
             radioButtons("UseMeas",
                          "UseMeas",
-                         choices = c(1,0),
-                         selected = 1)
+                         choices = c(TRUE,FALSE))
             
         ),
         
@@ -86,8 +86,8 @@ server <- function(input, output) {
                         MaxI=100,
                         NumDays=28,
                         IniMean=12,
-                        UseMeas=1,
-                        IniProb=3){
+                        UseMeas=TRUE,
+                        IniProb="3"){
         
         
         # Definitions etc.
@@ -138,6 +138,7 @@ server <- function(input, output) {
                     EQ = EQ2}
             
             P= t(EQ)%*%P;
+            
             # Correction for the error due to truncating number of infected to MaxI
             P = P/sum(P); 
         }
@@ -145,21 +146,28 @@ server <- function(input, output) {
     }
         
         output$distPlot <- renderPlot({
-            PP <- runCalc(N=input$N,
-                          n=input$n,
-                          gamma=input$gamma,
-                          R=input$R,
-                          MaxI = input$MaxI,
-                          NumDays=input$NumDays,
-                          IniMean=input$IniMean,
-                          #UseMeas=input$UseMeas,
-                          IniProb=input$IniProb)
+                PP <- runCalc(N=input$N,
+                              n=input$n,
+                              gamma=input$gamma,
+                              R=input$R,
+                              MaxI = input$MaxI,
+                              NumDays=input$NumDays,
+                              IniMean=input$IniMean,
+                              #UseMeas=input$UseMeas,
+                              IniProb=input$IniProb)
             
-            #ts(PP) %>% tibble() %>% 
-            #    pivot_longer()
+                gg <- data.frame(ts(PP)) %>% 
+                    rownames_to_column() %>% 
+                    mutate(rowname = as.numeric(rowname)) %>% 
+                    pivot_longer(!rowname)
+                
+                ggplot(gg, aes(x = rowname, y = value, group = name, color = name)) +
+                    geom_line() +
+                    theme(legend.position = "none") +
+                    xlab("# Cluster 5") +
+                    ylab("PDF")
             
-            plot(ts(PP),plot.type = "single", xlab = "#C5", ylab = "PDF")
-            
+            #plot(ts(PP),plot.type = "single", xlab = "#C5", ylab = "PDF")
     })
 }
 
