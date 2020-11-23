@@ -1,0 +1,23 @@
+* HS results
+Probability of zero Cluster5 by day
+>> disp(array2table(AuxRes,'VariableNames',ColLab));
+    Min probability of zero Cluster5    Probability of zero Cluster5    Day
+    ________________________________    ____________________________    ___
+
+                   0.9                            0.90896               47 
+                  0.95                            0.96052               50 
+                  0.99                            0.99057               55 
+                 0.999                            0.99907               63 
+
+>> 
+* TK results
+Probability of zero Cluster5 by day
+    Min probability of zero Cluster5    Probability of zero Cluster5    Day
+    ________________________________    ____________________________    ___
+
+                   0.9                            0.91519               48 
+                  0.95                            0.95131               50 
+                  0.99                            0.99123               56 
+                 0.999                            0.99913               64 
+
+>> 
