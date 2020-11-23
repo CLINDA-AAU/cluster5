@@ -64,7 +64,7 @@ ui <- fluidPage(
                         selected = 3),
             radioButtons("UseMeas",
                          "UseMeas",
-                         choices = c(TRUE,FALSE))
+                         choices = c("Yes","No"))
             
         ),
         
@@ -86,7 +86,7 @@ server <- function(input, output) {
                         MaxI=100,
                         NumDays=28,
                         IniMean=12,
-                        UseMeas=TRUE,
+                        UseMeas="Yes",
                         IniProb="3"){
         
         
@@ -106,7 +106,7 @@ server <- function(input, output) {
         # Measurements
         Y = matrix(0, nrow = NumDays, ncol = 1); # Assume no Cluster5
         Y[20,1]= 0*1;                            # Include a measurements of Cluster5
-        if (!UseMeas){
+        if (UseMeas == "No"){
             Y= Y*NaN;
         }
         
@@ -153,7 +153,7 @@ server <- function(input, output) {
                               MaxI = input$MaxI,
                               NumDays=input$NumDays,
                               IniMean=input$IniMean,
-                              #UseMeas=input$UseMeas,
+                              UseMeas=input$UseMeas,
                               IniProb=input$IniProb)
             
                 gg <- data.frame(ts(PP)) %>% 
