@@ -11,6 +11,7 @@ library(expm)
 library(shiny)
 library(ggplot2)
 library(tidyverse)
+library(patchwork)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -72,7 +73,7 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("distPlot")
+           plotOutput("distPlot", width = "auto", height = "800px")
         )
     )
 )
@@ -156,21 +157,46 @@ server <- function(input, output) {
                               IniMean=input$IniMean,
                               UseMeas=input$UseMeas,
                               IniProb=input$IniProb)
-            
-                data.frame(ts(PP)) %>% 
+                
+                gg <- data.frame(ts(PP)) %>% 
                     rownames_to_column() %>% 
                     mutate(rowname = as.numeric(rowname)) %>% 
                     pivot_longer(!rowname) %>% 
                     mutate("NumDays" = as.numeric(sub("Series\\.", "", name))) %>% 
-                    filter(value > 0.01) %>%  # Filter small values to not stretch x-axis
+                    group_by(NumDays) %>% 
+                    mutate(cs = cumsum(value))
+                
+                ## Pick a nice looking xlim
+                max_x_value <- gg %>% group_by(rowname) %>% 
+                    mutate(pdf_sum = sum(value)) %>% 
+                    filter(pdf_sum < 0.01) %>% 
+                    pull(rowname) %>% 
+                    min()
+                
+                
+                ## Plot probability density function
+                pdf_plot <- gg %>%
                     ggplot(aes(x = rowname, y = value, group = name, color = NumDays)) +
+                    coord_cartesian(xlim=c(0,max_x_value)) +
                     geom_line() +
                     xlab("# Cluster 5") +
                     ylab("PDF") +
-                    scale_color_viridis_c(name = "Number of days") +
-                    theme(legend.position = "bottom")
+                    scale_color_viridis_c(name = "Number of days")# +
+                    #theme(legend.position = "bottom")
                 
-            #plot(ts(PP),plot.type = "single", xlab = "#C5", ylab = "PDF")
+                ## Plot distribution function
+                cdf_plot <- gg %>%  arrange(NumDays, rowname)  %>% 
+                    ggplot(aes(x = rowname, y = cs, group = name, color = NumDays)) +
+                    coord_cartesian(xlim=c(0,max_x_value)) +
+                    geom_line() +
+                    xlab("# Cluster 5") +
+                    ylab("CDF") +
+                    scale_color_viridis_c(name = "Number of days")# +
+                    #theme(legend.position = "bottom")
+                
+                ## Combine plots
+                (pdf_plot / cdf_plot) + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+            
     })
 }
 
