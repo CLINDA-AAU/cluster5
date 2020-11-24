@@ -40,6 +40,7 @@ ui <- fluidPage(
                         "Reproduction rate (R):",
                         min = 0,
                         max = 10,
+                        step = 0.1,
                         value = 1.2),
             sliderInput("MaxI",
                         "MaxI:",
@@ -156,17 +157,19 @@ server <- function(input, output) {
                               UseMeas=input$UseMeas,
                               IniProb=input$IniProb)
             
-                gg <- data.frame(ts(PP)) %>% 
+                data.frame(ts(PP)) %>% 
                     rownames_to_column() %>% 
                     mutate(rowname = as.numeric(rowname)) %>% 
-                    pivot_longer(!rowname)
-                
-                ggplot(gg, aes(x = rowname, y = value, group = name, color = name)) +
+                    pivot_longer(!rowname) %>% 
+                    mutate("NumDays" = as.numeric(sub("Series\\.", "", name))) %>% 
+                    filter(value > 0.01) %>%  # Filter small values to not stretch x-axis
+                    ggplot(aes(x = rowname, y = value, group = name, color = NumDays)) +
                     geom_line() +
-                    theme(legend.position = "none") +
                     xlab("# Cluster 5") +
-                    ylab("PDF")
-            
+                    ylab("PDF") +
+                    scale_color_viridis_c(name = "Number of days") +
+                    theme(legend.position = "bottom")
+                
             #plot(ts(PP),plot.type = "single", xlab = "#C5", ylab = "PDF")
     })
 }
