@@ -194,9 +194,16 @@ server <- function(input, output) {
                     scale_color_viridis_c(name = "Number of days")# +
                     #theme(legend.position = "bottom")
                 
+                prob_days_plot <- gg %>% filter(rowname == 1) %>% 
+                    ggplot(aes(x = NumDays, y = cs)) +
+                    geom_line() +
+                    ylab("Probability of no Cluster 5") +
+                    xlab("Days since last observation") +
+                    ylim(c(0,1))
+                
                 ## Combine plots
-                (pdf_plot / cdf_plot) + plot_layout(guides = "collect") & theme(legend.position = "bottom")
-            
+                #(pdf_plot / cdf_plot) + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+                prob_days_plot
     })
 }
 
