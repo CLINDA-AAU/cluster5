@@ -50,7 +50,7 @@ ui <- fluidPage(
                         value = 100),
             sliderInput("NumDays",
                         "Number of Days:",
-                        min = 0,
+                        min = 20,
                         max = 100,
                         value = 28),
             sliderInput("IniMean",
