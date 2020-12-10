@@ -1,0 +1,76 @@
+---
+title: "collect_data"
+author: "RFB"
+date: "10/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ISOweek)
+```
+
+Read nextstrain data
+```{r}
+c5 <- read_tsv("../Data/nextstrain_groups_neherlab_ncov_DanishCluster_selected_metadata.tsv")
+
+c5_week <- c5 %>% filter(Host == "Human") %>% 
+  mutate(week = ISOweek(`Collection Data`)) %>% 
+  mutate(week = as.numeric(substr(week, 7, 8))) %>% 
+  select(Clade, week) %>% 
+  group_by(week) %>% 
+  summarize(cluster5 = n())
+
+c5_week
+```
+
+Covid19 overvågningsdate fra SSI kan hentes fra: https://covid19.ssi.dk/overvagningsdata/download-fil-med-overvaagningdata 
+
+Read epi data
+```{r}
+kom_cases <- read_csv2("../Data/Data-Epidemiologiske-Rapport-09122020-31ac/Municipality_cases_time_series.csv")
+kom_test  <- read_csv2("../Data/Data-Epidemiologiske-Rapport-09122020-31ac/Municipality_tested_persons_time_series.csv")
+kom_pos   <- read_csv2("../Data/Data-Epidemiologiske-Rapport-09122020-31ac/Municipality_test_pos.csv")
+
+reg_test  <- read_csv2("../Data/Data-Epidemiologiske-Rapport-09122020-31ac/Test_regioner.csv")
+```
+
+Nordjyske kommuner
+```{r}
+rn_kom <- c("Hjørring", "Brønderslev", "Frederikshavn", "Jammerbugt", "Læsø", "Mariagerfjord",
+            "Morsø", "Rebild", "Thisted", "Vesthimmerlands", "Aalborg")
+```
+
+Summarize tests per week for RN
+```{r}
+rn_test_week <- kom_test %>% 
+  select(PrDate_adjusted, all_of(rn_kom)) %>% 
+  pivot_longer(cols = all_of(rn_kom)) %>% 
+  mutate(week = ISOweek(PrDate_adjusted)) %>% 
+  mutate(week = as.numeric(substr(week, 7, 8))) %>% 
+  group_by(week) %>% 
+  summarize(tests = sum(value))
+```
+Summarize cases per week for RN
+```{r}
+rn_case_week <- kom_cases %>% 
+  select(date_sample, all_of(rn_kom)) %>% 
+  pivot_longer(cols = all_of(rn_kom)) %>% 
+  mutate(week = ISOweek(date_sample)) %>% 
+  mutate(week = as.numeric(substr(week, 7, 8))) %>% 
+  group_by(week) %>% 
+  summarize(cases = sum(value))
+```
+Join data
+```{r}
+week_data <- rn_test_week %>% 
+  left_join(rn_case_week, by = "week") %>% 
+  left_join(c5_week, by = "week")
+```
+
+Dump data
+```{r}
+write_csv2(week_data, file = "../Data/rn_cluster5_data.csv")
+```
+

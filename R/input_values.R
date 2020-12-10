@@ -1,0 +1,9 @@
+input <- list("N" = 300000,
+              "n" = 10000,
+              "gamma" = 1/3.4,
+              "R"= 1.2,
+              "MaxI" = 100,
+              "NumDays" = 4*7,
+              "IniMean" = 12,
+              "UseMeas" = "Yes",
+              "IniProb" = "3")
