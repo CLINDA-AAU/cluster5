@@ -17,7 +17,7 @@ library(patchwork)
 ui <- fluidPage(
 
     # Application title
-    titlePanel("Cluster5"),
+    titlePanel("C5"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
