@@ -28,11 +28,11 @@ Covid19 overvågningsdate fra SSI kan hentes fra: https://covid19.ssi.dk/overvag
 
 Read epi data
 ```{r}
-kom_cases <- read_csv2("../Data/Data-Epidemiologiske-Rapport-22012021-12jk/Municipality_cases_time_series.csv")
-kom_test  <- read_csv2("../Data/Data-Epidemiologiske-Rapport-22012021-12jk/Municipality_tested_persons_time_series.csv")
-kom_pos   <- read_csv2("../Data/Data-Epidemiologiske-Rapport-22012021-12jk/Municipality_test_pos.csv")
+kom_cases <- read_csv2("../Data/Data-Epidemiologiske-Rapport-04022021-h1k6-v2/Municipality_cases_time_series.csv")
+kom_test  <- read_csv2("../Data/Data-Epidemiologiske-Rapport-04022021-h1k6-v2/Municipality_tested_persons_time_series.csv")
+kom_pos   <- read_csv2("../Data/Data-Epidemiologiske-Rapport-04022021-h1k6-v2/Municipality_test_pos.csv")
 
-reg_test  <- read_csv2("../Data/Data-Epidemiologiske-Rapport-22012021-12jk/Test_regioner.csv")
+reg_test  <- read_csv2("../Data/Data-Epidemiologiske-Rapport-04022021-h1k6-v2/Test_regioner.csv")
 ```
 
 Read genomic surveillance data from covid19genomics.dk 
