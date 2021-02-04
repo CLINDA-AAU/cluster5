@@ -1,9 +1,16 @@
+library(tidyverse)
+
 kl <- function(dy, lam){
+
+  # Kullback-Leibler divergence between a discrete density dy, 
+  # and the Poisson distribution with parameter lm
+  
   res <- 0
   for(i in 1:length(dy[1,])){
     res <- res + dy[2,i] * log(dy[2,i]/dpois(dy[1,i],lam))
   }
   res
+
 }
 
 N   <- 5000000                # Population size
