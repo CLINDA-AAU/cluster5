@@ -89,7 +89,7 @@ ui <- fluidPage(
 server <- function(input, output) {
     
     thres <- function(x, threshold){
-        match(FALSE, x < threshold)
+        match(FALSE,x<threshold)
     }
     
     constructQ <- function(MaxI, gamma, beta){
@@ -105,10 +105,11 @@ server <- function(input, output) {
     
     runCalc <- function(  N1 = 300000, N2=N1,
                           n1 = 10000,  n2=n1,
-                          gamma1=1/3.4, gamma2=gamma1,
+                          gamma1=1/3.4,gamma2=gamma1,
                           R1=1.2, R2=R1,
                           MaxI=100,
                           NumDays=28,
+                          Y = rep(0,NumDays),
                           TimeIntervention = Inf,
                           IniMean=12,
                           UseMeas="Yes",
@@ -133,11 +134,11 @@ server <- function(input, output) {
                       EQ2 = constructQ(MaxI, beta2, gamma2)
                       
                       # Measurements
-                      Y = matrix(0, nrow = NumDays, ncol = 1); # Assume no Cluster5
-                      Y[20,1]= 0*1;                            # Include a measurements of Cluster5
-                      if (UseMeas == "No"){
-                          Y= Y*NaN;
-                      }
+                      #    Y = matrix(0, nrow = NumDays, ncol = 1); # Assume no Cluster5
+                      #    Y[20,1]= 0*1;                            # Include a measurements of Cluster5
+                      #    if (UseMeas == "No"){
+                      #      Y= Y*NaN;
+                      #    }
                       
                       # Initial probability for states
                       P = matrix(0, nrow = MaxI, ncol = 1);
