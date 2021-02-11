@@ -8,6 +8,12 @@ library(ggplot2)
 library(tidyverse)
 library(patchwork)
 library(Hmisc)
+library(sf)
+
+
+thres <- function(x, threshold){
+  match(FALSE,x<threshold)
+}
 
 constructQ <- function(MaxI, gamma, beta){
   Q1 = matrix(0, MaxI, MaxI)
@@ -26,6 +32,7 @@ runCalc <- function(  N1 = 300000, N2=N1,
                       R1=1.2, R2=R1,
                       MaxI=100,
                       NumDays=28,
+                      Y = rep(0,NumDays),
                       TimeIntervention = Inf,
                       IniMean=12,
                       UseMeas="Yes",
@@ -50,11 +57,11 @@ runCalc <- function(  N1 = 300000, N2=N1,
     EQ2 = constructQ(MaxI, beta2, gamma2)
         
     # Measurements
-    Y = matrix(0, nrow = NumDays, ncol = 1); # Assume no Cluster5
-    Y[20,1]= 0*1;                            # Include a measurements of Cluster5
-    if (UseMeas == "No"){
-      Y= Y*NaN;
-    }
+#    Y = matrix(0, nrow = NumDays, ncol = 1); # Assume no Cluster5
+#    Y[20,1]= 0*1;                            # Include a measurements of Cluster5
+#    if (UseMeas == "No"){
+#      Y= Y*NaN;
+#    }
     
     # Initial probability for states
     P = matrix(0, nrow = MaxI, ncol = 1);
@@ -129,8 +136,7 @@ p.testing <- ggplot(res.testing, aes(x=Day, y=Prob)) +
   geom_hline(yintercept=0.85, linetype="dashed", color = "grey", size = 1) + 
   geom_hline(yintercept=0.9, linetype="dashed", color = "grey", size = 1) +
   geom_hline(yintercept=0.95, linetype="dashed", color = "grey", size = 1) +
-  scale_color_brewer(palette="YlOrRd") +
-  plot_annotation(tag_levels = "A")
+  scale_color_brewer(palette="YlOrRd")
 p.testing$labels$colour <- "WGS Ratio"
 
 res.restrictions <- res[res$Ratio==0.25,] 
@@ -143,27 +149,21 @@ p.restrictions <- ggplot(res.restrictions, aes(x=Day, y=Prob)) +
   geom_hline(yintercept=0.85, linetype="dashed", color = "grey", size = 1) + 
   geom_hline(yintercept=0.9, linetype="dashed", color = "grey", size = 1) +
   geom_hline(yintercept=0.95, linetype="dashed", color = "grey", size = 1) +
-  scale_color_brewer(palette="YlOrRd") +
-  plot_annotation(tag_levels = "B")
+  scale_color_brewer(palette="YlOrRd")
 p.restrictions$labels$colour <- "R"
 
 # Figure
 
-pdf("Interventions.pdf")
-
-p.testing / p.restrictions
-
-dev.off()
+p.testing / p.restrictions + plot_annotation(tag_levels = "A") 
+ggsave("Interventions.pdf", width = 18, units="cm")
 
 # Table
 
-thres <- function(x){
-  match(FALSE,x<0.9)
-}
-
 thresholds <- res %>% 
   group_by(Ratio, R) %>%
-  summarise(Cut = thres(Prob))
+  summarise("Prob < 0.85" = thres(Prob,0.85),
+            "Prob < 0.90" = thres(Prob,0.90),
+            "Prob < 0.95" = thres(Prob,0.95))
 
 rownames(thresholds) <- NULL
 
@@ -175,6 +175,45 @@ latex(thresholds,file="days.tex",
 ## Danish mink case
 
 # Map of Denmark
+
+geo_sf <- read_sf("https://dawa.aws.dk/kommuner/?format=geojson")
+geo_sf <- geo_sf %>% 
+  mutate(grp=case_when(navn %in% c("Hjørring","Frederikshavn") ~ "Cluster 5",
+                       navn %in% c("Morsø","Thisted","Brønderslev","Frederikshavn",
+                                   "Vesthimmerlands","Læsø","Rebild","Mariagerfjord","Jammerbugt","Aalborg") ~ "NDR",
+                       TRUE ~ "Other"))
+
+geo_sf %>% ggplot() +
+  geom_sf(aes(fill = grp), size=0.1) +
+  scale_fill_manual(values=c("red","blue","white"))+
+  labs(title="", fill="Category") +
+  theme_void()+
+  theme(legend.position=c(0.8,0.8))
+ggsave("Denmark.pdf",width = 18, units="cm")
+
+# Generate Danish data
+
+# Read Danish Cluster 5 data
+c5 <- read.csv("Data/rn_cluster5_data.csv", sep = ";")
+c5[is.na(c5)] <- 0
+c5 <- c5[c5$week >= "2020-w35" & c5$week<="2020-w49",]
+
+N   <- 589148                 # Population size (North Denmark Region)
+nk <- median(c5$sequenced)
+
+PP <- runCalc(N1 = N,
+        n1 = nk,
+        gamma1=0.3,
+        R1=R[j],
+        MaxI=100,
+        NumDays=dim(c5)[1],
+        Y = c5$cluster5,
+        TimeIntervention=Inf,
+        IniMean=4,
+        UseMeas="Yes",
+        IniProb="3", Threshold = Threshold)
+
+plot(PP[1,])
 
 # Intervention analysis
 
