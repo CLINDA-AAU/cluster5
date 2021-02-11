@@ -226,5 +226,5 @@ pk <- 0.28                    # Ratio of positives WGS tested
 nk  <- 17000   # Numer of PCR tests (median)
 mk  <- round(pk*nk*(xk+xkm)/N)  # 0.28 of positive sent for WGS tests (median)
 
-NumDays = 80
+NumDays = 70
 
