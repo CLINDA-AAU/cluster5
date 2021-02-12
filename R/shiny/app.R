@@ -15,34 +15,40 @@ library(patchwork)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
+    
+    
     # Application title
-    titlePanel("Covid19 Variant of Concern Monitor"),
+    titlePanel( div(column(width = 6, h2("Covid19 Variant of Concern Monitor")),
+                    column(width = 3, offset = 3, tags$img(src = "__AAU_LEFT_RGB_UK.png"))),
+                windowTitle="Covid19 Variant of Concern Monitor"
+    ),
+    # tags$img(src = "__AAU_LEFT_RGB_UK.png"),
+    # titlePanel("Covid19 Variant of Concern Monitor"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
             sliderInput("N1",
-                        "N:",
+                        "Population size:",
                         min = 100000,
                         max = 500000,
                         value = 300000,
                         step = 5000),
             sliderInput("n1",
-                        "n:",
+                        "Number of sequenced individuals:",
                         min = 100,
                         max = 20000,
                         value = 10000,
                         step = 100),
             sliderInput("gamma1",
-                        "gamma:",
+                        "Recovery time parameter (gamma):",
                         min = 0,
                         max = 1,
                         value = 1/3.4),
             sliderInput("R1",
                         "Reproduction rate (R):",
                         min = 0,
-                        max = 10,
+                        max = 4,
                         step = 0.1,
                         value = 1.2),
             sliderInput("MaxI",
@@ -56,10 +62,10 @@ ui <- fluidPage(
                         max = 100,
                         value = 28),
             sliderInput("IniMean",
-                        "IniMean:",
+                        "Initial number of individuals with VOC:",
                         min = 0,
                         max = 100,
-                        value = 12),
+                        value = 11),
             sliderInput("Threshold",
                         "Threshold:",
                         min = 0,
@@ -226,7 +232,7 @@ server <- function(input, output) {
                 
                 prob_days_plot <- gg %>% filter(rowname == 1) %>% 
                     ggplot(aes(x = NumDays, y = cs)) +
-                    geom_line(color = "red") +
+                    geom_line(color = "#221a52", size = 2) +
                     xlab("Day") + 
                     ylab("Probability of extinction") +
                     ylim(c(0,1)) +
