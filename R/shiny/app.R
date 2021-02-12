@@ -19,7 +19,7 @@ ui <- fluidPage(
     
     # Application title
     titlePanel( div(column(width = 6, h2("Covid19 Variant of Concern Monitor")),
-                    column(width = 3, offset = 3, tags$img(src = "__AAU_LEFT_RGB_UK.png"))),
+                    column(width = 6, tags$img(src = "__AAU_LEFT_RGB_UK.png", align = "right"))), #, width = "25%", height = "25%"))),
                 windowTitle="Covid19 Variant of Concern Monitor"
     ),
     # tags$img(src = "__AAU_LEFT_RGB_UK.png"),
@@ -51,11 +51,7 @@ ui <- fluidPage(
                         max = 4,
                         step = 0.1,
                         value = 1.2),
-            sliderInput("MaxI",
-                        "MaxI:",
-                        min = 1,
-                        max = 1000,
-                        value = 100),
+            
             sliderInput("NumDays",
                         "Number of Days:",
                         min = 20,
@@ -66,6 +62,11 @@ ui <- fluidPage(
                         min = 0,
                         max = 100,
                         value = 11),
+            sliderInput("MaxI",
+                        "Max number of individuals with VOC:",
+                        min = 1,
+                        max = 1000,
+                        value = 100),
             sliderInput("Threshold",
                         "Threshold:",
                         min = 0,
