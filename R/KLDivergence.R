@@ -51,31 +51,40 @@ yk <- cluster.sampling(N, xk, xkm, nk, mk, nsim = nsim)
 dyk <- as.data.frame(table(yk))
 dyk$yk <- as.integer(levels(dyk$yk))
 dyk$Freq <- dyk$Freq/nsim
+dyk$Type = "Sample"
 
 # Poisson approximation
 
 lam <- mk*xk/(xk+xkm)
-dzkpois <- data.frame(yk=dyk$yk, Freq=dpois(dyk[,1],lam))
+dzkpois <- data.frame(yk=dyk$yk, Freq=dpois(dyk[,1],lam), Type = "Poisson")
 KLpois <- kl(dyk, dzk)
 
 # Binomial approximation
 
-dzk <- data.frame(yk=dyk$yk, Freq =dbinom(dyk[,1], mk, xk/(xk+xkm)))
-KLbinom1 <- kl(dyk, dzk)
+dzk.binom1 <- data.frame(yk=dyk$yk, Freq =dbinom(dyk[,1], mk, xk/(xk+xkm)), Type = "Binom1")
+KLbinom1 <- kl(dyk, dzk.binom1)
 
 # Binomial approximation
 
-dzk <- data.frame(yk=dyk$yk, Freq =dbinom(dyk[,1], pk*nk, xk/N))
-KLbinom2 <- kl(dyk, dzk)
+dzk.binom2 <- data.frame(yk=dyk$yk, Freq =dbinom(dyk[,1], pk*nk, xk/N), Type = "Binom2")
+KLbinom2 <- kl(dyk, dzk.binom2)
+
+dyk.all <- rbind(dyk, dzkpois, dzk.binom1, dzk.binom2)
 
 # Kullback-Leibler divergence between sampling distribution and plot
 
-plot(dyk[,1],dyk[,2], xlab = "Number", ylab = "Probability")
-points(dyk[,1],dpois(dyk[,1],lam), col = "red")
-points(dyk[,1],dbinom(dyk[,1], mk, xk/(xk+xkm)), col = "blue")
-points(dyk[,1],dbinom(dyk[,1], pk*nk, xk/N), col = "green")
-legend("topright", pch = c(1,1), col = c("black", "red","blue", "green"), 
-       legend = c("Sample","Poisson", "Binom1", "Binom2"), bty = "n")
-title(paste("KLD = ", as.character(round(KLpois,5)),",",as.character(round(KLbinom1,5)),"",as.character(round(KLbinom2,5))))
+p.distr <- ggplot(dyk.all, aes(x=yk,y=Freq)) +
+  geom_point(dyk.all, mapping = aes(x=yk,y=Freq,color=Type), size = 2) +
+  scale_color_manual(values=AAU_pal("second")(6)) +
+  xlab("Number") + ylab("Probability")
+p.distr
+ggsave("Distribution.pdf", width = 18, units="cm")
+
+kld <- data.frame(Type = c("Poisson", "Binom1", "Binom2"),
+                 KLD  = round(c(KLpois, KLbinom1, KLbinom2),4))
+
+latex(kld,file="kld.tex", 
+      caption = "Kulback-Leibler divergence between the approximations and the simulated sampling distribution",
+      label = "tab:kld", rowname=NULL)
 
 
