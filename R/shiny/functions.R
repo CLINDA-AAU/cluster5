@@ -1,3 +1,34 @@
+## Double sampling function of specific cluster
+
+cluster.sampling <- function(N, xk, xkm, nk, mk, nsim = 100){
+  
+  yk <- rep(0,nsim)
+  
+  for(i in 1:nsim){
+    x <- rep("Neg",N)
+    x[1:xk] <- "C"
+    x[(xk+1):(xk+xkm)] <- "Pos"
+    
+    z <- sample(x, nk)
+    
+    y <- sample(z[z!="Neg"], mk)
+    
+    yk[i] <- sum(y=="C")
+    
+  }
+  yk
+}
+
+
+## Kullback-Leibler divergence between a discrete densities dy and dz
+
+kl <- function(dy, dz){
+  
+  sum(dy[,2]*log(dy[,2]/dz[,2]))
+  
+}
+
+
 ## Days to threhold for extinction
 thres <- function(x, threshold){
   match(FALSE,x<threshold)

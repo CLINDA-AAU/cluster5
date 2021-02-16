@@ -127,12 +127,18 @@ p.restrictions <- ggplot(res.restrictions, aes(x=Day, y=Prob)) +
 p.restrictions$labels$colour <- "R"
 
 # Figure
-p.testing / p.restrictions + plot_annotation(tag_levels = "A") 
-ggsave("../Output/Figures/Interventions.pdf", width = 18, units="cm")
+p.res <- p.testing / p.restrictions + plot_annotation(tag_levels = "A") 
+p.res
 ```
 
+```{r, include = F}
+# Dump figure
+ggsave(p.res, filename = "../Output/Figures/Interventions.pdf", width = 18, units="cm")
+```
+
+
 Table with results
-```{r}
+```{r, warning = F}
 thresholds <- res %>% 
   group_by(Ratio, R) %>%
   summarise("Prob < 0.85" = thres(Prob,0.85),
@@ -190,7 +196,11 @@ p.reproduction <- ggplot(thresholds.long,aes(x=R, y=Prob)) +
   xlab("R") + ylab("Week") + 
   scale_color_manual(values = unname(branded_colors))
 p.reproduction
-ggsave("../Output/Figures/Reproduction.pdf", width = 18, units = "cm")
+```
+
+```{r, include= F}
+# Dump figure
+ggsave(p.reproduction, filename = "../Output/Figures/Reproduction.pdf", width = 18, units = "cm")
 ```
 
 
@@ -206,15 +216,21 @@ geo_sf <- geo_sf %>%
                                    "Vesthimmerlands","Læsø","Rebild","Mariagerfjord","Jammerbugt","Aalborg") ~ "North Denmark",
                        TRUE ~ "Remaining"))
 
-geo_sf %>% ggplot() +
+fig_dk <- geo_sf %>% ggplot() +
   geom_sf(aes(fill = grp), size=0.1) +
   #scale_fill_manual(values=c(rev(c(AAU_pal("second")(3)[1:3])),"white")) +
   scale_fill_manual(values = c(branded_colors[c("red","blue", "yellow")], "white")) +
   labs(title="", fill="Status week 46, 2020") +
   theme_void()+
   theme(legend.position=c(0.8,0.8))
-ggsave("../Output/Figures/Denmark.pdf",width = 18, units="cm")
+fig_dk
 ```
+
+```{r, include = F}
+# Dump figure
+ggsave(fig_dk, filename = "../Output/Figures/Denmark.pdf",width = 18, units="cm")
+```
+
 
 ## Setup data
 Generate Danish mink case
@@ -232,9 +248,6 @@ intervention <- data.frame(Week = c(46,47,50),
                            Announced = as.Date(c("11/06/20","11/13/20","11/06/20"), "%m/%d/%y"),
                            Effect = as.Date(c("11/09/20","11/16/20","12/07/20"), "%m/%d/%y"),
                            Description = c("Lockdown", "Reopening", "Planned"))
-
-#dates <- c("02/27/92", "02/27/92", "01/14/92", "02/28/92", "02/01/92")
-#as.Date(dates, "%m/%d/%y")
 ```
 
 ## Analyse data
@@ -295,7 +308,11 @@ p.minkcase <- ggplot(res.mink, aes(x=Week, y=Prob)) +
   xlab("Week") + ylab("Probability of extinction") +
   scale_color_manual(values= unname(branded_colors))
 p.minkcase
-ggsave("../Output/Figures/Mink.pdf", width = 18, units="cm")
+```
+
+```{r, include = F}
+# dump figure
+ggsave(p.minkcase, filename = "../Output/Figures/Mink.pdf", width = 18, units="cm")
 ```
 
 Table of Cuts
@@ -316,11 +333,79 @@ kable(cut.mink.wide, caption = "Planned and realized probability of extinction, 
 ```
 
 
-```{r}
+```{r, include = F}
 # Dump LaTeX table
 temp_table2 <- latex(cut.mink.wide,file="../Output/Tables/cut.tex", 
                      caption = "Planned and realized probability of extinction, before, at the break, and
       at time of planned intervention",  label = "tab:min", rowname=NULL)
 
+```
+
+## Kullback-Leibler
+Simulation of the sampling distribution and approximations
+```{r, cache = T}
+#N   <- 589148                 # Population size (North Denmark Region)
+xkmm <- 0.006*N               # 0.6% of the population is positive (median)
+xk  <- round(0.006*N*0.08)    # 8% of infected with specific variant
+xkm <- xkmm - xk              # Number of infected with non-specific variant
+pk <- 0.28                    # Ratio of positives WGS tested
+
+nk  <- 17000   # Numer of PCR tests (median)
+mk  <- round(pk*nk*(xk+xkm)/N)  # 0.28 of positive sent for WGS tests (median)
+
+
+# Simulation
+nsim <- 10000
+yk <- cluster.sampling(N, xk, xkm, nk, mk, nsim = nsim)
+dyk <- as.data.frame(table(yk))
+dyk$yk <- as.integer(levels(dyk$yk))
+dyk$Freq <- dyk$Freq/nsim
+dyk$Type = "Sample"
+
+# Poisson approximation
+lam <- mk*xk/(xk+xkm)
+dzkpois <- data.frame(yk=dyk$yk, Freq=dpois(dyk[,1],lam), Type = "Poisson")
+KLpois <- kl(dyk, dzkpois)
+
+# Binomial approximation
+dzk.binom1 <- data.frame(yk=dyk$yk, Freq =dbinom(dyk[,1], mk, xk/(xk+xkm)), Type = "Binom1")
+KLbinom1 <- kl(dyk, dzk.binom1)
+
+# Alternative binomial approximation
+dzk.binom2 <- data.frame(yk=dyk$yk, Freq =dbinom(dyk[,1], pk*nk, xk/N), Type = "Binom2")
+KLbinom2 <- kl(dyk, dzk.binom2)
+
+# Gather data
+dyk.all <- rbind(dyk, dzkpois, dzk.binom1, dzk.binom2)
+```
+
+Kullback-Leibler divergence between sampling distribution and plot
+```{r}
+p.distr <- ggplot(dyk.all, aes(x=yk,y=Freq)) +
+  geom_point(dyk.all, mapping = aes(x=yk,y=Freq,color=Type), size = 2) +
+  scale_color_manual(values=unname(branded_colors)) +
+  xlab("Number") + ylab("Probability")
+p.distr
+```
+
+```{r, include = F}
+# Dump figure
+ggsave(p.distr, filename = "../Output/Figures/Distribution.pdf", width = 18, units="cm")
+```
+
+
+Table
+```{r}
+kld <- data.frame(Type = c("Poisson", "Binom1", "Binom2"),
+                 KLD  = round(c(KLpois, KLbinom1, KLbinom2),4))
+kable(kld, caption = "Kulback-Leibler divergence between the approximations and the simulated sampling distribution")
+```
+
+
+```{r, include = F}
+# Dump latex table
+temp_table <- latex(kld,file="../Output/Tables/kld.tex", 
+                    caption = "Kulback-Leibler divergence between the approximations and the simulated sampling distribution",
+                    label = "tab:kld", rowname=NULL)
 ```
 
