@@ -53,15 +53,15 @@ AAU_pal <- function(palette = "main", reverse = FALSE, ...) {
 }
 ```
 
-Basic statistics for the North Denmark Region
+Basic statistics for the North Denmark Region, 31 December 2020.
 ```{r}
-north.denmark <- data.frame(Municipality = c("Frederikshavn", "Hjørring", "Jammerbugt", 
-                                             "Brønderslev", "Thisted", "Vesthimmerland",
-                                             "Læsø", "Morsø", "Rebild", "Aalborg"),
-                            Inhabitants  = c(61158, 66178, 38611, 
-                                             35754, 44908, 37534,
-                                             1897, 21474, 28911, 201142),
-                            Type = c(rep("Locked",7),rep("non-Locked",3)))
+north.denmark <- data.frame(Municipality = c("Brønderslev", "Frederikshavn", "Hjørring",
+                                             "Jammerbugt","Læsø", "Vesthimmerlands", 
+                                             "Thisted", "Mariagerfjord", "Morsø",
+                                             "Rebild", "Aalborg"),
+                            Inhabitants  = c(36304, 59654, 64483, 38324, 1786, 36727, 43423, 41800, 20247, 
+                                             30113, 217075),
+                            Type = c(rep("Locked",7),rep("non-Locked",4)))
 
 nd.summary <- north.denmark %>% 
   group_by(Type) %>% summarise(Inhabitants = sum(Inhabitants))
@@ -73,6 +73,7 @@ N <- sum(nd.summary["Inhabitants"])
 # Simulations
 ## Increased WGS testing activity and restrictions
 ```{r}
+N <- 600000
 NumDays = 60
 nk      = 10000
 pk <- c(0.25, 0.5, 0.75, 1.0)
@@ -83,12 +84,12 @@ for(j in 1:(length(R))){
   for(i in 1:(length(pk))){
   PP <- runCalc(N1 = N,
                 n1 = pk[i]*nk,
-                gamma1=0.3,
+                gamma1=0.5,
                 R1=R[j],
                 MaxI=100,
                 NumDays=NumDays,
                 TimeIntervention=Inf,
-                IniMean=12,
+                IniMean=11,
                 IniProb="Kronecker")
   tmp <- data.frame(Day=1:NumDays, Prob=PP[1,], Ratio = pk[i], R = R[j])
   if(i==1 && j==1){
@@ -162,9 +163,8 @@ temp_table <- latex(thresholds,file="../Output/Tables/days.tex",
 NumDays = 60
 nk      = 10000
 pk <- 0.25
-Threshold = c(0.1,0.90,0.95)
 R <- seq(0.5, 2.5, by = 0.01)
-gamma1 <- 1
+gamma1 <- 0.5
 
 for(i in 1:length(R)){
   PP <- runCalc(N1 = N,
@@ -210,10 +210,9 @@ Map of Denmark
 geo_sf <- read_sf("https://dawa.aws.dk/kommuner/?format=geojson")
 geo_sf <- geo_sf %>% 
   mutate(grp=case_when(navn %in% c("Hjørring","Frederikshavn") ~ "Cluster 5",
-                       navn %in% c("Thisted","Brønderslev","Frederikshavn",
+                       navn %in% c("Thisted","Brønderslev",
                                    "Vesthimmerlands","Læsø","Jammerbugt") ~ "Locked down",
-                       navn %in% c("Morsø","Thisted","Brønderslev","Frederikshavn",
-                                   "Vesthimmerlands","Læsø","Rebild","Mariagerfjord","Jammerbugt","Aalborg") ~ "North Denmark",
+                       navn %in% c("Morsø", "Rebild","Mariagerfjord","Aalborg") ~ "North Denmark",
                        TRUE ~ "Remaining"))
 
 fig_dk <- geo_sf %>% ggplot() +
@@ -240,6 +239,25 @@ c5 <- read.csv("../Data/rn_cluster5_data.csv", sep = ";")
 c5$Week <- as.integer(substring(c5$week,7))
 c5[is.na(c5)] <- 0
 c5 <- c5[c5$Week >= 35 & c5$Week<=53,]
+c5.print <- c5
+
+c5.print <- data.frame(Week = c5$Week, PCR = c5$tests, Infected = c5$cases,
+                       WGS = c5$sequenced, Cluster5 = c5$cluster5)
+rownames(c5.print) <- NULL
+
+```
+
+Table with results
+```{r, warning = F}
+kable(c5.print, caption = "Weekly test data.")
+```
+
+```{r}
+# Dump LaTeX table
+# storing the table as an object in the workspace prevents compilation, but still saves the .tex
+temp_table <- latex(c5.print,file="../Output/Tables/summary.tex", 
+                    caption = "Weekly test data.", 
+                    label = "tab:summary", rowname=NULL)
 ```
 
 Create intervention table
