@@ -22,6 +22,7 @@ library(Hmisc)
 library(sf)
 library(scales)
 library(knitr)
+library(ggtext)
 
 source("shiny/functions.R")
 ```
@@ -124,7 +125,8 @@ p.restrictions <- ggplot(res.restrictions, aes(x=Day, y=Prob)) +
   geom_hline(yintercept=0.85, linetype="dashed", color = "grey", size = 1) + 
   geom_hline(yintercept=0.9, linetype="dashed", color = "grey", size = 1) +
   geom_hline(yintercept=0.95, linetype="dashed", color = "grey", size = 1) +
-  scale_color_manual(values= unname(branded_colors))
+  scale_color_manual(values= unname(branded_colors), name = "R<sub>0</sub>") +
+  theme(legend.title = element_markdown())
 p.restrictions$labels$colour <- "R"
 
 # Figure
@@ -152,10 +154,15 @@ kable(thresholds, caption = "Weeks to thresholds for various testing and restric
 
 ```{r}
 # Dump LaTeX table
+col_heads_out <- colnames(thresholds)
+col_heads_out[1] <- R_0
+
 # storing the table as an object in the workspace prevents compilation, but still saves the .tex
 temp_table <- latex(thresholds,file="../Output/Tables/days.tex", 
                     caption = "Weeks to thresholds for various testing and restriction strategies.", 
-                    label = "tab:intervention", rowname=NULL)
+                    label = "tab:intervention", rowname=NULL,
+                    colheads = col_heads_out
+                    )
 ```
 
 ## Effect of reproduction rate
@@ -193,8 +200,9 @@ thresholds.long = thresholds %>%
 
 p.reproduction <- ggplot(thresholds.long,aes(x=R, y=Prob)) + 
   geom_line(thresholds.long, mapping = aes(x=R, y=Week, color = Prob)) +
-  xlab("R") + ylab("Week") + 
-  scale_color_manual(values = unname(branded_colors))
+  xlab("R<sub>0</sub>") + ylab("Week") + 
+  scale_color_manual(values = unname(branded_colors)) +
+  theme(axis.title.x = element_markdown())
 p.reproduction
 ```
 
