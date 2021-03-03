@@ -23,6 +23,7 @@ library(sf)
 library(scales)
 library(knitr)
 library(ggtext)
+library(readxl)
 
 source("shiny/functions.R")
 ```
@@ -56,13 +57,12 @@ AAU_pal <- function(palette = "main", reverse = FALSE, ...) {
 
 Basic statistics for the North Denmark Region, 31 December 2020.
 ```{r}
-north.denmark <- data.frame(Municipality = c("Brønderslev", "Frederikshavn", "Hjørring",
-                                             "Jammerbugt","Læsø", "Vesthimmerlands", 
-                                             "Thisted", "Mariagerfjord", "Morsø",
-                                             "Rebild", "Aalborg"),
-                            Inhabitants  = c(36304, 59654, 64483, 38324, 1786, 36727, 43423, 41800, 20247, 
-                                             30113, 217075),
-                            Type = c(rep("Locked",7),rep("non-Locked",4)))
+north.denmark <- read_xlsx("../Data/Population-North-DenmarkRegion-31122020.xlsx",
+                           range = "B4:C14",
+                           col_names = c("Municipality", "Inhabitants")) %>% 
+  mutate(Type = ifelse(Municipality %in% c("Mariagerfjord", "Morsø","Rebild", "Aalborg"),
+                       "non-locked", "Locked")) %>% 
+  arrange(Type)
 
 nd.summary <- north.denmark %>% 
   group_by(Type) %>% summarise(Inhabitants = sum(Inhabitants))
@@ -154,14 +154,14 @@ kable(thresholds, caption = "Weeks to thresholds for various testing and restric
 
 ```{r}
 # Dump LaTeX table
-col_heads_out <- colnames(thresholds)
-col_heads_out[1] <- R_0
+col_heads_out <- c("Ratio","R_0", "Prob $<$ 0.85", "Prob $<$ 0.90", "Prob $<$ 0.95")
 
 # storing the table as an object in the workspace prevents compilation, but still saves the .tex
 temp_table <- latex(thresholds,file="../Output/Tables/days.tex", 
                     caption = "Weeks to thresholds for various testing and restriction strategies.", 
                     label = "tab:intervention", rowname=NULL,
-                    colheads = col_heads_out
+                    colheads = col_heads_out,
+                    math.col.names = F
                     )
 ```
 
