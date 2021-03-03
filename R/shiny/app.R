@@ -74,12 +74,18 @@ ui <- fluidPage(
                         min = 0,
                         max = 1,
                         value = 0.9),
-            radioButtons("IniProb",
-                        "IniProb:",
-                        choices = c("Kronecker delta" = "Kronecker",
-                                    #"Uniform" = "Uniform",
-                                    "Poisson" = "Poisson"),
-                        selected = "Poisson"),
+            selectInput("IniProb", "IniProb:", choices = c("Kronecker", "Poisson", "Uniform")),
+            conditionalPanel(
+                "input.IniProb == 'Uniform'",
+                sliderInput("Nuni", label = "Uniform Range", min = 1, 
+                            max = 100, value = c(1, 10))
+            )
+            #radioButtons("IniProb",
+            #            "IniProb:",
+            #            choices = c("Kronecker delta" = "Kronecker",
+            #                        #"Uniform" = "Uniform",
+            #                        "Poisson" = "Poisson"),
+            #            selected = "Poisson"),
             
         ),
         
@@ -99,6 +105,7 @@ server <- function(input, output) {
                               n1=input$n1, n2=input$n1,
                               gamma1=input$gamma1, gamma2=input$gamma1,
                               R1=input$R1, R2=input$R1,
+                              Nlow = input$Nuni[1], Nhigh = input$Nuni[2],
                               MaxI = input$MaxI,
                               NumDays=input$NumDays,
                               IniMean=input$IniMean,
