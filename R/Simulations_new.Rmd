@@ -155,14 +155,17 @@ kable(thresholds, caption = "Weeks to thresholds for various testing and restric
 ```{r}
 # Dump LaTeX table
 col_heads_out <- c("Ratio","R_0", "Prob $<$ 0.85", "Prob $<$ 0.90", "Prob $<$ 0.95")
+nrg <- unname(table(thresholds$Ratio))
+thresholds2 <- thresholds
+thresholds2$Ratio[duplicated(thresholds2$Ratio) == T] <- " "
 
 # storing the table as an object in the workspace prevents compilation, but still saves the .tex
-temp_table <- latex(thresholds,file="../Output/Tables/days.tex", 
+temp_table <- latex(thresholds2,file="../Output/Tables/days.tex", 
                     caption = "Weeks to thresholds for various testing and restriction strategies.", 
                     label = "tab:intervention", rowname=NULL,
                     colheads = col_heads_out,
-                    math.col.names = F
-                    )
+                    math.col.names = F,
+                    n.rgroup = nrg)
 ```
 
 ## Effect of reproduction rate
