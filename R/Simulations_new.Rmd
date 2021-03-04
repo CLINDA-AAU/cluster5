@@ -91,7 +91,7 @@ for(j in 1:(length(R))){
                 NumDays=NumDays,
                 TimeIntervention=Inf,
                 IniMean=11,
-                IniProb="Kronecker")
+                IniProb="Atom")
   tmp <- data.frame(Day=1:NumDays, Prob=PP[1,], Ratio = pk[i], R = R[j])
   if(i==1 && j==1){
     res <- tmp}else 
@@ -185,7 +185,7 @@ for(i in 1:length(R)){
                 NumDays=NumDays,
                 TimeIntervention=Inf,
                 IniMean=12,
-                IniProb="Kronecker")
+                IniProb="Atom")
   tmp <- data.frame(Day=1:NumDays, Prob=PP[1,], Ratio = pk, R = R[i])
   if(i==1){
     res <- tmp}else 
@@ -303,7 +303,7 @@ PP <- runCalc(N1 = N.locked,
         Y = c5$cluster5,
         TimeIntervention=12,
         IniMean=4,
-        IniProb="Kronecker")
+        IniProb="Atom")
 
 res.mink <- data.frame(Week=c5$Week, Prob=PP[1,], 
                        Strategy="Planned")
@@ -322,7 +322,7 @@ PP <- runCalc(N1 = N.locked,
               Y = c5$cluster5,
               TimeIntervention=Inf,
               IniMean=4,
-              IniProb="Kronecker")
+              IniProb="Atom")
 
 res.mink <- rbind(res.mink, data.frame(Week=c5$Week, Prob=PP[1,], 
                           Strategy="Realized"))

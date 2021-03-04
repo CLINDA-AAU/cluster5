@@ -59,11 +59,6 @@ ui <- fluidPage(
                         min = 20,
                         max = 100,
                         value = 28),
-            sliderInput("IniMean",
-                        "Initial number of individuals with VOC:",
-                        min = 0,
-                        max = 100,
-                        value = 11),
             sliderInput("MaxI",
                         "Max number of individuals with VOC:",
                         min = 1,
@@ -74,18 +69,28 @@ ui <- fluidPage(
                         min = 0,
                         max = 1,
                         value = 0.9),
-            selectInput("IniProb", "IniProb:", choices = c("Kronecker", "Poisson", "Uniform")),
+            selectInput("IniProb", "IniProb:", choices = c("Atom", "Poisson", "Uniform")),
             conditionalPanel(
                 "input.IniProb == 'Uniform'",
                 sliderInput("Nuni", label = "Uniform Range", min = 1, 
                             max = 100, value = c(1, 10))
+            ),
+            conditionalPanel(
+                "input.IniProb == 'Poisson'",
+                sliderInput("IniMean",
+                            "Initial number of individuals with VOC:",
+                            min = 0,
+                            max = 100,
+                            value = 11)
+            ),
+            conditionalPanel(
+                "input.IniProb == 'Atom'",
+                sliderInput("IniMean2",
+                            "Initial number of individuals with VOC:",
+                            min = 0,
+                            max = 100,
+                            value = 11)
             )
-            #radioButtons("IniProb",
-            #            "IniProb:",
-            #            choices = c("Kronecker delta" = "Kronecker",
-            #                        #"Uniform" = "Uniform",
-            #                        "Poisson" = "Poisson"),
-            #            selected = "Poisson"),
             
         ),
         
@@ -101,6 +106,8 @@ ui <- fluidPage(
 server <- function(input, output) {
     
     output$distPlot <- renderPlot({
+                IniMean <- ifelse(input$IniProb == "Atom", input$IniMean2, input$IniMean)
+        
                 PP <- runCalc(N1=input$N1, N2=input$N1,
                               n1=input$n1, n2=input$n1,
                               gamma1=input$gamma1, gamma2=input$gamma1,
@@ -108,7 +115,7 @@ server <- function(input, output) {
                               Nlow = input$Nuni[1], Nhigh = input$Nuni[2],
                               MaxI = input$MaxI,
                               NumDays=input$NumDays,
-                              IniMean=input$IniMean,
+                              IniMean= IniMean,
                               IniProb=input$IniProb)
                 
                 gg <- data.frame(ts(PP)) %>% 
