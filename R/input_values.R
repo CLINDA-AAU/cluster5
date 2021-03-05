@@ -10,5 +10,5 @@ input <- list("N1" = 300000,
               "NumDays" = 4*7,
               "IniMean" = 12,
               "UseMeas" = "Yes",
-              "IniProb" = "3",
+              "IniProb" = "Atom",
               "Threshold" = 0.9)

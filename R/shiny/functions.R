@@ -55,10 +55,11 @@ runCalc <- function(  N1 = 300000, N2=N1,
                       R1=1.2, R2=R1,
                       MaxI=100,
                       TimeIntervention = Inf,
+                      Nlow = 1, Nhigh=10,
                       NumDays=28,
                       Y = rep(0,NumDays),
                       IniMean=12,
-                      IniProb="Kronecker"
+                      IniProb="Atom"
 ){
   # Set the birth rate corresponding to the reproduction rate and recovery time    
   beta1 = R1*gamma1; # Before intervention
@@ -77,9 +78,9 @@ runCalc <- function(  N1 = 300000, N2=N1,
               # Initial probability for states
               P = matrix(0, nrow = MaxI+1, ncol = 1);
               switch(IniProb,                      
-                     "Kronecker" = {P[IniMean+1,1] <- 1 },                # Kronecker delta
-                     "Uniform" = {P[Nlow:Nhigh,1] <- 1/(Nhigh-Nlow+1) },  # Uniform
-                     "Poisson" = {P[,1] <- dpois(0:MaxI, IniMean) }       # Poisson
+                     "Atom" = {P[IniMean+1,1] <- 1 },                     # Point mass in IniMean.
+                     "Uniform" = {P[Nlow:Nhigh,1] <- 1/(Nhigh-Nlow+1) },  # Uniform on Nlow to Nhigh
+                     "Poisson" = {P[,1] <- dpois(0:MaxI, IniMean) }       # Poisson with mean IniMean
               )
               
               # nstates x ndays container, holding day by day state a posterior probabilities.
