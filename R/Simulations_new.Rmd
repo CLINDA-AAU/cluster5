@@ -155,7 +155,7 @@ kable(thresholds, caption = "Weeks to thresholds for various testing and restric
 # storing the table as an object in the workspace prevents compilation, but still saves the .tex
 temp_table <- latex(thresholds,file="../Output/Tables/days.tex", 
                     caption = "Weeks to thresholds for various testing and restriction strategies.", 
-                    label = "tab:intervention", rowname=NULL)
+                    label = "tab:intervention", rowname=NULL, where = 'tb')
 ```
 
 ## Effect of reproduction rate
@@ -257,7 +257,7 @@ kable(c5.print, caption = "Weekly test data.")
 # storing the table as an object in the workspace prevents compilation, but still saves the .tex
 temp_table <- latex(c5.print,file="../Output/Tables/summary.tex", 
                     caption = "Weekly test data.", 
-                    label = "tab:summary", rowname=NULL)
+                    label = "tab:summary", rowname=NULL,where='tb')
 ```
 
 Create intervention table
@@ -355,7 +355,7 @@ kable(cut.mink.wide, caption = "Planned and realized probability of extinction, 
 # Dump LaTeX table
 temp_table2 <- latex(cut.mink.wide,file="../Output/Tables/cut.tex", 
                      caption = "Planned and realized probability of extinction, before, at the break, and
-      at time of planned intervention",  label = "tab:min", rowname=NULL)
+      at time of planned intervention",  label = "tab:min", rowname=NULL, where = 'tb')
 
 ```
 
@@ -423,7 +423,7 @@ kable(kld, caption = "Kulback-Leibler divergence between the approximations and 
 ```{r, include = F}
 # Dump latex table
 temp_table <- latex(kld,file="../Output/Tables/kld.tex", 
-                    caption = "Kulback-Leibler divergence between the approximations and the simulated sampling distribution",
-                    label = "tab:kld", rowname=NULL)
+                    caption = "Kulback-Leibler divergence between the approximations and the simulated sampling distribution.",
+                    label = "tab:kld", rowname=NULL, where='tb')
 ```
 
