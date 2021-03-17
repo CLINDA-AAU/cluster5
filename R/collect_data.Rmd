@@ -12,6 +12,7 @@ library(ISOweek)
 ```
 
 Read nextstrain data
+Obtained from https://nextstrain.org/groups/neherlab/ncov/DanishCluster?f_country=Denmark&label=clade:Mink.Cluster5
 ```{r}
 c5 <- read_tsv("../Data/nextstrain_groups_neherlab_ncov_DanishCluster_selected_metadata.tsv")
 
