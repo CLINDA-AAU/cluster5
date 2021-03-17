@@ -90,8 +90,10 @@ for(j in 1:(length(R))){
                 MaxI=100,
                 NumDays=NumDays,
                 TimeIntervention=Inf,
-                IniMean=11,
-                IniProb="Atom")
+                IniMean=10,
+                Y = c(10,rep(0,NumDays-1)),
+                Nlow = 0, Nhigh=20,
+                IniProb="Uniform")
   tmp <- data.frame(Day=1:NumDays, Prob=PP[1,], Ratio = pk[i], R = R[j])
   if(i==1 && j==1){
     res <- tmp}else 
@@ -162,14 +164,10 @@ thresholds2$Ratio[duplicated(thresholds2$Ratio) == T] <- " "
 # storing the table as an object in the workspace prevents compilation, but still saves the .tex
 temp_table <- latex(thresholds2,file="../Output/Tables/days.tex", 
                     caption = "Weeks to thresholds for various testing and restriction strategies.", 
-<<<<<<< HEAD
-                    label = "tab:intervention", rowname=NULL, where = 'tb')
-=======
-                    label = "tab:intervention", rowname=NULL,
+                    label = "tab:intervention", rowname=NULL, where = 'tb',
                     colheads = col_heads_out,
                     math.col.names = F,
                     n.rgroup = nrg)
->>>>>>> 235e1a8198e21d4f1ef7c60bd8988d07c83ed45f
 ```
 
 ## Effect of reproduction rate
@@ -188,8 +186,10 @@ for(i in 1:length(R)){
                 MaxI=100,
                 NumDays=NumDays,
                 TimeIntervention=Inf,
-                IniMean=12,
-                IniProb="Atom")
+                Y = c(10,rep(0,NumDays-1)),
+                Nlow = 0, Nhigh=20,
+                IniMean=10,
+                IniProb="Uniform")
   tmp <- data.frame(Day=1:NumDays, Prob=PP[1,], Ratio = pk, R = R[i])
   if(i==1){
     res <- tmp}else 
@@ -307,7 +307,8 @@ PP <- runCalc(N1 = N.locked,
         Y = c5$cluster5,
         TimeIntervention=12,
         IniMean=4,
-        IniProb="Atom")
+        Nlow = 0, Nhigh=20,
+        IniProb="Uniform")
 
 res.mink <- data.frame(Week=c5$Week, Prob=PP[1,], 
                        Strategy="Planned")
@@ -326,7 +327,8 @@ PP <- runCalc(N1 = N.locked,
               Y = c5$cluster5,
               TimeIntervention=Inf,
               IniMean=4,
-              IniProb="Atom")
+              Nlow = 1, Nhigh=20,
+              IniProb="Poisson")
 
 res.mink <- rbind(res.mink, data.frame(Week=c5$Week, Prob=PP[1,], 
                           Strategy="Realized"))
