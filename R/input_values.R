@@ -1,3 +1,5 @@
+# parameters for manually testing shiny app.
+
 input <- list("N1" = 300000,
               "N2" = 300000,
               "n1" = 10000,
