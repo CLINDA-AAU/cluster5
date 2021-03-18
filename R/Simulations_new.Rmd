@@ -90,8 +90,8 @@ for(j in 1:(length(R))){
                 MaxI=100,
                 NumDays=NumDays,
                 TimeIntervention=Inf,
-                IniMean=10,
-                Y = c(10,rep(0,NumDays-1)),
+                IniMean=11,
+                Y = c(11,rep(0,NumDays-1)),
                 Nlow = 0, Nhigh=20,
                 IniProb="Uniform")
   tmp <- data.frame(Day=1:NumDays, Prob=PP[1,], Ratio = pk[i], R = R[j])
@@ -186,9 +186,9 @@ for(i in 1:length(R)){
                 MaxI=100,
                 NumDays=NumDays,
                 TimeIntervention=Inf,
-                Y = c(10,rep(0,NumDays-1)),
+                Y = c(11,rep(0,NumDays-1)),
                 Nlow = 0, Nhigh=20,
-                IniMean=10,
+                IniMean=11,
                 IniProb="Uniform")
   tmp <- data.frame(Day=1:NumDays, Prob=PP[1,], Ratio = pk, R = R[i])
   if(i==1){
