@@ -224,16 +224,16 @@ Map of Denmark
 ```{r}
 geo_sf <- read_sf("https://dawa.aws.dk/kommuner/?format=geojson")
 geo_sf <- geo_sf %>% 
-  mutate(grp=case_when(navn %in% c("Hjørring","Frederikshavn") ~ "Cluster 5",
+  mutate(grp=case_when(navn %in% c("Hjørring","Frederikshavn") ~ "Cluster 5 observed",
                        navn %in% c("Thisted","Brønderslev",
                                    "Vesthimmerlands","Læsø","Jammerbugt") ~ "Locked down",
-                       navn %in% c("Morsø", "Rebild","Mariagerfjord","Aalborg") ~ "North Denmark",
-                       TRUE ~ "Remaining"))
+                       navn %in% c("Morsø", "Rebild","Mariagerfjord","Aalborg") ~ "Not locked down")
+  )
 
 fig_dk <- geo_sf %>% ggplot() +
   geom_sf(aes(fill = grp), size=0.1) +
   #scale_fill_manual(values=c(rev(c(AAU_pal("second")(3)[1:3])),"white")) +
-  scale_fill_manual(values = c(branded_colors[c("red","blue", "yellow")], "white")) +
+  scale_fill_manual(values = c(branded_colors[c("red","blue", "yellow")], "white"), na.translate =F) +
   labs(title="", fill="Status week 46, 2020") +
   theme_void()+
   theme(legend.position=c(0.8,0.8))
