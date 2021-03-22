@@ -138,7 +138,7 @@ p.res
 
 ```{r, include = F}
 # Dump figure
-ggsave(p.res, filename = "../Output/Figures/Interventions.pdf", width = 18, units="cm")
+ggsave(p.res, filename = "../Output/Figures/Interventions.pdf", width = 18, height = 12, units="cm")
 ```
 
 
@@ -215,7 +215,7 @@ p.reproduction
 
 ```{r, include= F}
 # Dump figure
-ggsave(p.reproduction, filename = "../Output/Figures/Reproduction.pdf", width = 18, units = "cm")
+ggsave(p.reproduction, filename = "../Output/Figures/Reproduction.pdf", width = 18, height = 12, units = "cm")
 ```
 
 
@@ -336,18 +336,18 @@ res.mink <- rbind(res.mink, data.frame(Week=c5$Week, Prob=PP[1,],
 res.mink$Strategy <- factor(res.mink$Strategy)
 
 p.minkcase <- ggplot(res.mink, aes(x=Week, y=Prob)) + 
-  geom_point(res.mink, mapping = aes(x=Week, y=Prob, color=Strategy), size=2)+
-  geom_vline(xintercept=45, linetype="dashed", color = "grey", size = 1) +
+    geom_vline(xintercept=45, linetype="dashed", color = "grey", size = 1) +
   geom_vline(xintercept=47, linetype="dashed", color = "grey", size = 1) + 
   geom_vline(xintercept=50, linetype="dashed", color = "grey", size = 1) + 
   xlab("Week") + ylab("Probability of extinction") +
+  geom_point(res.mink, mapping = aes(x=Week, y=Prob, color=Strategy), size=2)+
   scale_color_manual(values= unname(branded_colors))
 p.minkcase
 ```
 
 ```{r, include = F}
 # dump figure
-ggsave(p.minkcase, filename = "../Output/Figures/Mink.pdf", width = 18, units="cm")
+ggsave(p.minkcase, filename = "../Output/Figures/Mink.pdf", width = 18, height = 12, units="cm")
 ```
 
 Table of Cuts
@@ -367,13 +367,33 @@ kable(cut.mink.wide, caption = "Planned and realized probability of extinction, 
       at time of planned intervention")
 ```
 
-
 ```{r, include = F}
 # Dump LaTeX table
 temp_table2 <- latex(cut.mink.wide,file="../Output/Tables/cut.tex", 
                      caption = "Planned and realized probability of extinction, before, at the break, and
       at time of planned intervention",  label = "tab:min", rowname=NULL, where = 'tb')
 
+```
+
+```{r}
+cut.mink.wide <- round(cut.mink.wide,2)
+
+# Combine figure and table
+p.minkcase2 <- p.minkcase +
+  annotate(geom = "text", label = cut.mink.wide[1,2], x = cut.mink.wide[1,1] +1.1,
+           y = cut.mink.wide[1,2], colour = branded_colors[1]) +
+  annotate(geom = "text", label = cut.mink.wide[1,3], x = cut.mink.wide[1,1] -1.1,
+           y = cut.mink.wide[1,3], colour = branded_colors[2]) +
+  annotate(geom = "text", label = cut.mink.wide[2,2], x = cut.mink.wide[2,1] +1.1,
+           y = cut.mink.wide[2,2], colour = branded_colors[1]) +
+  annotate(geom = "text", label = cut.mink.wide[2,3], x = cut.mink.wide[2,1] -1.1,
+           y = cut.mink.wide[2,3], colour = branded_colors[2]) +
+  annotate(geom = "text", label = cut.mink.wide[3,2], x = cut.mink.wide[3,1] +1.1,
+           y = cut.mink.wide[3,2], colour = branded_colors[1]) +
+  annotate(geom = "text", label = cut.mink.wide[3,3], x = cut.mink.wide[3,1] -1.1,
+           y = cut.mink.wide[3,3], colour = branded_colors[2])
+
+ggsave(p.minkcase2, filename = "../Output/Figures/Mink2.pdf", width = 18, height = 12, units="cm")
 ```
 
 ## Kullback-Leibler
@@ -419,13 +439,31 @@ Kullback-Leibler divergence between sampling distribution and plot
 p.distr <- ggplot(dyk.all, aes(x=yk,y=Freq)) +
   geom_point(dyk.all, mapping = aes(x=yk,y=Freq,color=Type), size = 2) +
   scale_color_manual(values=unname(branded_colors)) +
-  xlab("Number") + ylab("Probability")
+  xlab("Number") + ylab("Probability") +
+  scale_x_continuous(breaks = 0:9)
 p.distr
 ```
 
 ```{r, include = F}
 # Dump figure
-ggsave(p.distr, filename = "../Output/Figures/Distribution.pdf", width = 18, units="cm")
+ggsave(p.distr, filename = "../Output/Figures/Distribution.pdf", width = 18, height = 12, units="cm")
+```
+
+
+```{r}
+#Try with overlay of KL
+p.distr2 <- ggplot(dyk.all, aes(x=yk,y=Freq)) +
+  geom_point(dyk.all, mapping = aes(x=yk,y=Freq,color=Type), size = 2) +
+  scale_color_manual(values=unname(branded_colors)) +
+  xlab("Number") + ylab("Probability") +
+  scale_x_continuous(breaks = 0:9) +
+  annotate(geom = "Text", x = 7, y = 0.25, label = paste("KL divergence: \n",
+                                        "Binom1 =", round(KLbinom1,4), "\n",
+                                        "Binom2 =", round(KLbinom2,4), "\n",
+                                        "Poisson =", round(KLpois,4)),
+           hjust = 0)
+p.distr2
+ggsave(p.distr2, filename = "../Output/Figures/Distribution2.pdf", width = 18, height = 12, units="cm")
 ```
 
 
@@ -433,14 +471,18 @@ Table
 ```{r}
 kld <- data.frame(Type = c("Poisson", "Binom1", "Binom2"),
                  KLD  = round(c(KLpois, KLbinom1, KLbinom2),4))
-kable(kld, caption = "Kulback-Leibler divergence between the approximations and the simulated sampling distribution")
+
+#kld <- dyk.all %>% pivot_wider(names_from = "Type", values_from = "Freq") %>% 
+#  rename("Number" = yk)
+
+kable(kld, caption = "Kulback-Leibler divergence between the approximations and the simulated sampling distribution. Parameters used were $N=600,000$, $x_k=3,312$, $x_k'=288$, $n_k=17,000$, and $m_k=29$.")
 ```
 
 
 ```{r, include = F}
 # Dump latex table
 temp_table <- latex(kld,file="../Output/Tables/kld.tex", 
-                    caption = "Kulback-Leibler divergence between the approximations and the simulated sampling distribution.",
+                    caption = "Kulback-Leibler divergence between the approximations and the simulated sampling distribution. Parameters used were $N=600,000$, $x_k=3,312$, $x_k'=288$, $n_k=17,000$, and $m_k=29$.",
                     label = "tab:kld", rowname=NULL, where='tb')
 ```
 
