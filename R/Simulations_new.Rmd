@@ -114,7 +114,7 @@ p.testing <- ggplot(res.testing, aes(x=Day, y=Prob)) +
   geom_hline(yintercept=0.85, linetype="dashed", color = "grey", size = 1) + 
   geom_hline(yintercept=0.9, linetype="dashed", color = "grey", size = 1) +
   geom_hline(yintercept=0.95, linetype="dashed", color = "grey", size = 1) +
-  scale_color_manual(values= unname(branded_colors))
+  scale_color_manual(values= unname(branded_colors)[c(3,1,2,4)])
 p.testing$labels$colour <- "WGS Ratio"
 
 res.restrictions <- res[res$Ratio==0.25,] 
