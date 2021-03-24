@@ -12,9 +12,9 @@ library(ISOweek)
 ```
 
 Read nextstrain data
-Obtained from https://nextstrain.org/groups/neherlab/ncov/DanishCluster?f_country=Denmark&label=clade:Mink.Cluster5
+Obtained from https://nextstrain.org/groups/neherlab/ncov/S.Y453F?c=gt-S_453&f_clade_membership=Mink.Cluster5&f_region=Europe
 ```{r}
-c5 <- read_tsv("../Data/nextstrain_groups_neherlab_ncov_DanishCluster_selected_metadata.tsv")
+c5 <- read_tsv("../Data/nextstrain_groups_neherlab_ncov_S.Y453F_metadata.tsv")
 
 c5_week <- c5 %>% filter(Host == "Human") %>% 
   mutate(week = ISOweek(`Collection Data`)) %>% 
