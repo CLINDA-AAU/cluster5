@@ -65,46 +65,53 @@ runCalc <- function(  N1 = 300000, N2=N1,
   beta1 = R1*gamma1; # Before intervention
   beta2 = R2*gamma2; # After intervention
   
+  # Determine max number of individuals with VOC
+  if(is.na(MaxI) & IniProb == "Atom") MaxI <- IniMean + 100
+  if(is.na(MaxI) & IniProb == "Uniform") MaxI <- Nhigh + 100
+  if(is.na(MaxI) & IniProb == "Poisson") MaxI <- qpois(0.999, IniMean) + 100
+  
   if(TimeIntervention < NumDays){    
     n = rbind(matrix(n1, nrow = TimeIntervention-1, ncol=1),
-              matrix(n2, nrow = NumDays-TimeIntervention+1, ncol=1))}else
-                n = matrix(n1, nrow = NumDays, ncol=1)
-              
-              # Transition probability matrix
-              
-              EQ1 = constructQ(MaxI+1, beta1, gamma1)
-              EQ2 = constructQ(MaxI+1, beta2, gamma2)
-              
-              # Initial probability for states
-              P = matrix(0, nrow = MaxI+1, ncol = 1);
-              switch(IniProb,                      
-                     "Atom" = {P[IniMean+1,1] <- 1 },                     # Point mass in IniMean.
-                     "Uniform" = {P[Nlow:Nhigh,1] <- 1/(Nhigh-Nlow+1) },  # Uniform on Nlow to Nhigh
-                     "Poisson" = {P[,1] <- dpois(0:MaxI, IniMean) }       # Poisson with mean IniMean
-              )
-              
-              # nstates x ndays container, holding day by day state a posterior probabilities.
-              PP = matrix(0, nrow = MaxI+1, ncol = NumDays); 
-              
-              for(i in 1:NumDays){
-                # Measurement update
-                if (!is.nan(Y[i])){
-                  P = P*dbinom(Y[i]*as.vector(matrix(1,MaxI+1,1)),
-                               as.vector(n[i]*matrix(1,MaxI+1,1)),
-                               (1:(MaxI+1)-1)/N1)
-                  P= P/sum(P)
-                }
-                PP[,i] = P;                # PP does not include the initial PDF
-                # Time update;
-                if(i<TimeIntervention){
-                  EQ = EQ1}else{
-                    EQ = EQ2
-                  }
-                
-                P = t(EQ)%*%P;
-                
-                # Correction for the error due to truncating number of infected to MaxI
-                P = P/sum(P); 
-              }
-              return(PP)
+              matrix(n2, nrow = NumDays-TimeIntervention+1, ncol=1))
+  } else{
+    n = matrix(n1, nrow = NumDays, ncol=1)
+  }
+  
+  # Transition probability matrix
+  EQ1 = constructQ(MaxI+1, beta1, gamma1)
+  EQ2 = constructQ(MaxI+1, beta2, gamma2)
+  
+  # Initial probability for states
+  P = matrix(0, nrow = MaxI+1, ncol = 1);
+  switch(IniProb,                      
+         "Atom" = {P[IniMean+1,1] <- 1 },                     # Point mass in IniMean.
+         "Uniform" = {P[Nlow:Nhigh,1] <- 1/(Nhigh-Nlow+1) },  # Uniform on Nlow to Nhigh
+         "Poisson" = {P[,1] <- dpois(0:MaxI, IniMean) }       # Poisson with mean IniMean
+  )
+  
+  # nstates x ndays container, holding day by day state a posterior probabilities.
+  PP = matrix(0, nrow = MaxI+1, ncol = NumDays); 
+  
+  for(i in 1:NumDays){
+    # Measurement update
+    if (!is.nan(Y[i])){
+      P = P*dbinom(Y[i]*as.vector(matrix(1,MaxI+1,1)),
+                   as.vector(n[i]*matrix(1,MaxI+1,1)),
+                   (1:(MaxI+1)-1)/N1)
+      P= P/sum(P)
+    }
+    PP[,i] = P;                # PP does not include the initial PDF
+    # Time update;
+    if(i<TimeIntervention){
+      EQ = EQ1
+    } else{
+      EQ = EQ2
+    }
+    
+    P = t(EQ)%*%P;
+    
+    # Correction for the error due to truncating number of infected to MaxI
+    P = P/sum(P); 
+  }
+  return(PP)
 }

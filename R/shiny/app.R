@@ -37,7 +37,7 @@ ui <- fluidPage(
                         value = 600000,
                         step = 5000),
             sliderInput("n1",
-                        "Number of sequenced individuals:",
+                        "Number of sequenced individuals per week:",
                         min = 100,
                         max = 20000,
                         value = 10000,
@@ -46,39 +46,39 @@ ui <- fluidPage(
                         "Recovery time parameter (gamma):",
                         min = 0,
                         max = 1,
-                        value = 1/3.4),
+                        value = 0.5),
             sliderInput("R1",
                         "Reproduction rate (R):",
                         min = 0,
                         max = 4,
                         step = 0.1,
-                        value = 1.2),
+                        value = 1.0),
             
             sliderInput("NumDays",
-                        "Number of Days:",
-                        min = 20,
-                        max = 100,
-                        value = 28),
-            sliderInput("MaxI",
-                        "Max number of individuals with VOC:",
+                        "Number of weeks to run calculation:",
                         min = 1,
-                        max = 1000,
-                        value = 100),
+                        max = 100,
+                        value = 60),
+            #sliderInput("MaxI",
+            #            "Max number of individuals with VOC:",
+            #            min = 1,
+            #            max = 1000,
+            #            value = 100),
             sliderInput("Threshold",
-                        "Threshold:",
+                        "Desired probability of extinction:",
                         min = 0,
                         max = 1,
                         value = 0.9),
-            selectInput("IniProb", "IniProb:", choices = c("Atom", "Poisson", "Uniform")),
+            selectInput("IniProb", "Probability distribution for initial number of VOC:", choices = c("Atom", "Poisson", "Uniform")),
             conditionalPanel(
                 "input.IniProb == 'Uniform'",
-                sliderInput("Nuni", label = "Uniform Range", min = 1, 
+                sliderInput("Nuni", label = "Uniform Range:", min = 1, 
                             max = 100, value = c(1, 10))
             ),
             conditionalPanel(
                 "input.IniProb == 'Poisson'",
                 sliderInput("IniMean",
-                            "Initial number of individuals with VOC:",
+                            "Poisson mean:",
                             min = 0,
                             max = 100,
                             value = 11)
@@ -86,7 +86,7 @@ ui <- fluidPage(
             conditionalPanel(
                 "input.IniProb == 'Atom'",
                 sliderInput("IniMean2",
-                            "Initial number of individuals with VOC:",
+                            "Atom in:",
                             min = 0,
                             max = 100,
                             value = 11)
@@ -107,13 +107,14 @@ server <- function(input, output) {
     
     output$distPlot <- renderPlot({
                 IniMean <- ifelse(input$IniProb == "Atom", input$IniMean2, input$IniMean)
-        
+                
                 PP <- runCalc(N1=input$N1, N2=input$N1,
                               n1=input$n1, n2=input$n1,
                               gamma1=input$gamma1, gamma2=input$gamma1,
                               R1=input$R1, R2=input$R1,
                               Nlow = input$Nuni[1], Nhigh = input$Nuni[2],
-                              MaxI = input$MaxI,
+                              MaxI = NA,
+                              Y = c(11,rep(0,input$NumDays-1)),
                               NumDays=input$NumDays,
                               IniMean= IniMean,
                               IniProb=input$IniProb)
@@ -141,7 +142,7 @@ server <- function(input, output) {
                     geom_line() +
                     xlab("# Cluster 5") +
                     ylab("PDF") +
-                    scale_color_viridis_c(name = "Number of days")# +
+                    scale_color_viridis_c(name = "Number of weeks")# +
                     #theme(legend.position = "bottom")
                 
                 ## Plot distribution function
@@ -151,7 +152,7 @@ server <- function(input, output) {
                     geom_line() +
                     xlab("# Cluster 5") +
                     ylab("CDF") +
-                    scale_color_viridis_c(name = "Number of days")# +
+                    scale_color_viridis_c(name = "Number of weeks")# +
                     #theme(legend.position = "bottom")
                 
                 prob_days_plot <- gg %>% filter(rowname == 1) %>% 
@@ -161,7 +162,7 @@ server <- function(input, output) {
                     ylab("Probability of extinction") +
                     ylim(c(0,1)) +
                     geom_hline(yintercept=input$Threshold, linetype="dashed", color = "grey", size = 1) +
-                    annotate("text", label = paste(thres(gg$cs, input$Threshold), "days till", input$Threshold, "probability of extinction"),
+                    annotate("text", label = paste(thres(gg$cs, input$Threshold), "weeks till", input$Threshold, "probability of extinction"),
                              x = 5, y = 1)
                 
                 ## Combine plots
