@@ -287,7 +287,7 @@ intervention <- data.frame(Week = c(46,47,50),
 It was the plan to test the entire population of the region over a 4 weeks period
 i.e., nk = N.locked/4 = 71510 PCR tests per week. Assume a postive pct. of 1.5%, i.e,
 1072 positive tests. The test capacity was up to 5000 a week, so we assume all 1072
-will be WGS sequence, i.e. n2=1072
+will be WGS sequence, i.e. n2=1072.
 ```{r}
 R1 <- 1.2                   # Reproduction rate before intervention
 R2 <- 1                   # Reproduction rate after intervention
@@ -314,33 +314,34 @@ res.mink <- data.frame(Week=c5$Week, Prob=PP[1,],
                        Strategy="Planned")
 ```
 
-Realized: Actual observed data
+Realized: Actual observed data. For the realized scenario we also assume a change in the reproduction rate, due to the travel restrictions, but we instead use the actual number of sequenced individuals.
 ```{r}
-
 PP <- runCalc(N1 = N.locked,
-              n1 = round(c5$cases/2),
+              n1 = round(c5$cases[1:11]/2),
+              n2 = round(c5$cases[12:nrow(c5)]/2),
               gamma1=gamma1,
               R1=R1,
               R2=R2,
               MaxI=100,
               NumDays=dim(c5)[1],
               Y = c5$cluster5,
-              TimeIntervention=Inf,
+              TimeIntervention=12,
               IniMean=4,
-              Nlow = 1, Nhigh=20,
-              IniProb="Poisson")
+              Nlow = 0, Nhigh=20,
+              IniProb="Uniform")
+
 
 res.mink <- rbind(res.mink, data.frame(Week=c5$Week, Prob=PP[1,], 
                           Strategy="Realized"))
 
 res.mink$Strategy <- factor(res.mink$Strategy)
 
-p.minkcase <- ggplot(res.mink, aes(x=Week, y=Prob)) + 
-    geom_vline(xintercept=45, linetype="dashed", color = "grey", size = 1) +
+p.minkcase <- ggplot(res.mink, aes(x=Week, y=Prob, color=Strategy)) + 
+  geom_point(size=2) +
+  geom_vline(xintercept=45, linetype="dashed", color = "grey", size = 1) +
   geom_vline(xintercept=47, linetype="dashed", color = "grey", size = 1) + 
   geom_vline(xintercept=50, linetype="dashed", color = "grey", size = 1) + 
   xlab("Week") + ylab("Probability of extinction") +
-  geom_point(res.mink, mapping = aes(x=Week, y=Prob, color=Strategy), size=2)+
   scale_color_manual(values= unname(branded_colors))
 p.minkcase
 ```
