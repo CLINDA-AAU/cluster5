@@ -509,18 +509,6 @@ prior <- data.frame(a=pr, prob=prior(pr), Probability = "A-priori")
 prob <- rbind(extinction, prior)
 prob$Probability <- factor(prob$Probability)
 
-# Original
-#p.extinction <- ggplot(prob[prob$Probability == "A-posteriori", ], aes(x=a, y=prob, group = Probability, col = Probability)) +
-#  geom_line(data=prob[prob$Probability == "A-posteriori", ]) +
-#  geom_point(data=prob[prob$Probability == "A-priori", ]) +
-#  geom_line() +
-#    scale_color_manual(values = unname(branded_colors)) +
-#  xlab("Growth rate") + 
-#  ylab("Probability of extinction")
-
-p.extinction
-
-## Alternative
 p.extinction <- ggplot(prob[prob$Probability == "A-posteriori", ],
                        aes(x=a, y=prob, group = Probability, col = Probability)) +
   
