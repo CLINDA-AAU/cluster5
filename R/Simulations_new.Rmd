@@ -509,14 +509,32 @@ prior <- data.frame(a=pr, prob=prior(pr), Probability = "A-priori")
 prob <- rbind(extinction, prior)
 prob$Probability <- factor(prob$Probability)
 
-p.extinction <- ggplot(prob, aes(x=a, y=prob, group = Probability, col = Probability))+
-  geom_line(data=prob[prob$Probability == "A-posteriori", ]) +
+# Original
+#p.extinction <- ggplot(prob[prob$Probability == "A-posteriori", ], aes(x=a, y=prob, group = Probability, col = Probability)) +
+#  geom_line(data=prob[prob$Probability == "A-posteriori", ]) +
+#  geom_point(data=prob[prob$Probability == "A-priori", ]) +
+#  geom_line() +
+#    scale_color_manual(values = unname(branded_colors)) +
+#  xlab("Growth rate") + 
+#  ylab("Probability of extinction")
+
+p.extinction
+
+## Alternative
+p.extinction <- ggplot(prob[prob$Probability == "A-posteriori", ],
+                       aes(x=a, y=prob, group = Probability, col = Probability)) +
+  
+  geom_line() +
   geom_point(data=prob[prob$Probability == "A-priori", ]) +
-    scale_color_manual(values = unname(branded_colors)) +
+  scale_color_manual(values = unname(branded_colors),
+                     guide = guide_legend(override.aes = list(
+                         linetype = c("solid", "blank"),
+                         shape = c(NA, 16)))) +
   xlab("Growth rate") + 
   ylab("Probability of extinction")
 
 p.extinction
+
 
 ggsave(p.extinction, filename = "../Output/Figures/Extinction.pdf", width = 18, height = 12, units="cm")
 
